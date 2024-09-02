@@ -1,20 +1,26 @@
 from setuptools import Extension, find_packages, setup
-from setuptools.command.build_ext import build_ext
+from setuptools.command.build_ext import build_ext as _build_ext
+from setuptools.command.build_py import build_py as _build_py
 import os
 import shutil
 import subprocess
 import sys
 
-class m4ri_build_ext(build_ext):
+class build_ext(_build_ext):
     def build_extension(self, ext):
         def run(command):
             subprocess.check_call(command, cwd='xorsat/m4ri')
 
-        # run(['autoreconf', '--install'])
-        # run(['./configure'])
-        # run(['make'])
+        run(['autoreconf', '--install'])
+        run(['./configure'])
+        run(['make'])
 
         super().build_extension(ext)
+
+class build_py(_build_py):
+    def run(self):
+        self.run_command('build_ext')
+        return super().run()
 
 def check_binary(name, command):
     try:
@@ -31,6 +37,9 @@ if __name__ == '__main__':
 
     check_binary('autoreconf', ['autoreconf', '--version'])
     check_binary('make', ['make', '--version'])
+
+    # Make sure the m4ri submodule is loaded in advance
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
 
     setup(
         name='xorsat',
@@ -51,5 +60,8 @@ if __name__ == '__main__':
                 extra_link_args=['-Wl,-rpath=$ORIGIN/m4ri/.libs'],
             ),
         ],
-        cmdclass={'build_ext': m4ri_build_ext},
+        cmdclass={
+            'build_ext': build_ext,
+            'build_py': build_py,
+        },
     )
