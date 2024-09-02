@@ -1,0 +1,8 @@
+MANIFEST
+__pycache__/
+*.py[cod]
+*.so
+*.o
+*.egg-info/
+build/
+dist/

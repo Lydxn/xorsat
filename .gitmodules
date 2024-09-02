@@ -1,0 +1,3 @@
+[submodule "xorsat/m4ri"]
+	path = xorsat/m4ri
+	url = https://github.com/malb/m4ri/
